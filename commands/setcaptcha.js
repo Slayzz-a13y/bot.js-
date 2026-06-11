@@ -26,7 +26,7 @@ module.exports = {
         if(etat !== "on" && etat !== "off") return interaction.reply("L'état doit être `on` ou `off` !")
 
         if(etat === "off") {
-            await bot.db.query(`UPDATE guilds SET captcha = false WHERE id = $1`, [interaction.guild.id])
+            await bot.db.query(`UPDATE guilds SET captcha = 'false' WHERE id = $1`, [interaction.guild.id])
             await interaction.reply("Le captcha a été désactivé !")
 
         } else {
@@ -36,7 +36,12 @@ module.exports = {
             channel = interaction.guild.channels.cache.get(channel.id)
             if(!channel) return interaction.reply("Canal invalide !")
 
-            await bot.db.query(`UPDATE guilds SET captcha = $1 WHERE id = $2`, [channel.id, interaction.guild.id])
+            // ✅ INSERT si n'existe pas, UPDATE sinon
+            await bot.db.query(
+                `INSERT INTO guilds (id, captcha) VALUES ($1, $2) 
+                 ON CONFLICT (id) DO UPDATE SET captcha = $2`,
+                [interaction.guild.id, channel.id]
+            )
             await interaction.reply(`Le captcha a été activé dans le canal ${channel} !`)
         }
     }
