@@ -11,7 +11,7 @@ const db = require('./data')
 bot.commands = new Discord.Collection()
 bot.colors = "#ffffff"
 bot.function = {
-    createCaptcha: require('./Function/generateCaptcha'),
+    generateCaptcha: require('./Function/generateCaptcha'),
 }
 
 app.get('/', (req, res) => res.send('Bot is running!')); 
