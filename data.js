@@ -6,8 +6,8 @@ const db = new Pool({
 });
 
 async function init() {
-    // ✅ Détruire d'abord
-    await db.query(`DROP TABLE IF EXISTS guilds;`)
+    // ❌ Enlever ça :
+    // await db.query(`DROP TABLE IF EXISTS guilds;`)
 
     await db.query(`
         CREATE TABLE IF NOT EXISTS users (
