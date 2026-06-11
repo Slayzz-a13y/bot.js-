@@ -10,7 +10,8 @@ module.exports = {
             name: "membre", 
             description: "Le membre à débannir",
             required: true
-        }, {
+        },
+        {
             type: "string",
             name: "raison",
             description: "La raison du débannissement",
@@ -24,9 +25,21 @@ module.exports = {
             let reason = args.getString("raison")
             if(!reason) reason = "Aucune raison fournie"
             if(!(await interaction.guild.bans.fetch()).get(user.id)) return interaction.reply("Ce membre n'est pas banni !")
-            try { await user.send(`Vous avez été débanni du serveur ${interaction.guild.name} pour la raison : ${reason}`) } catch (err) {}
-            await interaction.reply(`${interaction.user} a unban ${user.tag} pour la raison : ${reason}`)
+
             await interaction.guild.members.unban(user, reason)
+
+            
+            await bot.db.query(
+                `INSERT INTO moderation (user_id, guild_id, action, reason, moderator_id) VALUES ($1, $2, $3, $4, $5)`,
+                [user.id, interaction.guild.id, 'unban', reason, interaction.user.id]
+            )
+
+            try { 
+                await user.send(`Vous avez été débanni du serveur **${interaction.guild.name}** pour la raison : ${reason}`) 
+            } catch (err) {}
+
+            await interaction.reply(`✅ ${interaction.user} a unban ${user.tag} pour la raison : ${reason}`)
+
         } catch (err) {
             console.error(err)
             return interaction.reply("Une erreur est survenue !")

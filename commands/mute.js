@@ -11,12 +11,14 @@ module.exports = {
             name: "membre", 
             description: "Le membre à mute",
             required: true
-        }, {
+        },
+        {
             type: "string",
             name: "temps",
             description: "La durée du mute",
             required: true
-        }, {
+        },
+        {
             type: "string",
             name: "raison",
             description: "La raison du mute",
@@ -39,8 +41,19 @@ module.exports = {
         if(member && !member?.moderatable) return interaction.reply("Je ne peux pas mute ce membre !")
         if(member && interaction.member.roles.highest.comparePositionTo(member.roles.highest) <= 0) return interaction.reply("Vous ne pouvez pas mute ce membre !")
         if(member.isCommunicationDisabled()) return interaction.reply("Ce membre est déjà mute !")
-        try { await user.send(`Vous avez été mute du serveur ${interaction.guild.name} pendant ${time} pour la raison : ${reason}`) } catch (err) {}
-        await interaction.reply(`${interaction.user} a mute ${user.tag} pendant ${time} pour la raison : ${reason}`)
+
         await member.timeout(ms(time), reason)
+
+        // Sauvegarde en DB
+        await bot.db.query(
+            `INSERT INTO moderation (user_id, guild_id, action, reason, moderator_id) VALUES ($1, $2, $3, $4, $5)`,
+            [user.id, interaction.guild.id, `mute (${time})`, reason, interaction.user.id]
+        )
+
+        try { 
+            await user.send(`Vous avez été mute du serveur **${interaction.guild.name}** pendant ${time} pour la raison : ${reason}`) 
+        } catch (err) {}
+
+        await interaction.reply(`✅ ${interaction.user} a mute ${user.tag} pendant ${time} pour la raison : ${reason}`)
     }
 }

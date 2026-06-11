@@ -22,7 +22,7 @@ module.exports = {
         await interaction.deferReply()
 
         try {
-            let user = await bot.users.fetch(args.get("membre").value)
+            let user = args.getUser("membre")
             if (!user) return interaction.editReply("Pas de membre à bannir !")
 
             let member = interaction.guild.members.cache.get(user.id)
@@ -45,14 +45,19 @@ module.exports = {
             if ((await interaction.guild.bans.fetch()).get(user.id))
                 return interaction.editReply("Ce membre est déjà banni !")
 
-            try { await user.send(`Vous avez été banni du serveur ${interaction.guild.name} pour la raison : ${reason}`) } catch (err) {}
-
             await interaction.guild.members.ban(user.id, { reason: reason })
-            bot.db.prepare(`
-            INSERT INTO moderation (user_id, guild_id, action, reason, moderator_id)
-            VALUES (?, ?, ?, ?, ?)
-            `).run(user.id, interaction.guild.id, 'ban', reason, interaction.user.id)
-            await interaction.editReply(`${interaction.user} a banni ${user.tag} pour la raison : ${reason}`)
+
+            // Sauvegarde en DB
+            await bot.db.query(
+                `INSERT INTO moderation (user_id, guild_id, action, reason, moderator_id) VALUES ($1, $2, $3, $4, $5)`,
+                [user.id, interaction.guild.id, 'ban', reason, interaction.user.id]
+            )
+
+            try { 
+                await user.send(`Vous avez été banni du serveur **${interaction.guild.name}** pour la raison : ${reason}`) 
+            } catch (err) {}
+
+            await interaction.editReply(`✅ ${interaction.user} a banni ${user.tag} pour la raison : ${reason}`)
 
         } catch (err) {
             console.error(err)

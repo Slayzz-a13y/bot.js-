@@ -1,7 +1,6 @@
 const Database = require('better-sqlite3');
 const db = new Database('bot_data.db');
 
-// Créer les tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,

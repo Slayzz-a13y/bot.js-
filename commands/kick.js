@@ -42,9 +42,18 @@ module.exports = {
         if (member && interaction.member.roles.highest.comparePositionTo(member.roles.highest) <= 0)
             return interaction.editReply("Vous ne pouvez pas kick ce membre !")
 
-        try { await user.send(`Vous avez été kick du serveur ${interaction.guild.name} pour la raison : ${reason}`) } catch (err) {}
-
         await member.kick(reason)
-        await interaction.editReply(`${interaction.user} a kick ${user.tag} pour la raison : ${reason}`)
+
+        // Sauvegarde en DB
+        await bot.db.query(
+            `INSERT INTO moderation (user_id, guild_id, action, reason, moderator_id) VALUES ($1, $2, $3, $4, $5)`,
+            [user.id, interaction.guild.id, 'kick', reason, interaction.user.id]
+        )
+
+        try { 
+            await user.send(`Vous avez été kick du serveur **${interaction.guild.name}** pour la raison : ${reason}`) 
+        } catch (err) {}
+
+        await interaction.editReply(`✅ ${interaction.user} a kick ${user.tag} pour la raison : ${reason}`)
     }
 }
