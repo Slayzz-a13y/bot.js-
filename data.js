@@ -27,11 +27,11 @@ async function init() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `)
-    
+
     await db.query(`
         CREATE TABLE IF NOT EXISTS guilds (
             id TEXT PRIMARY KEY,
-            captcha BOOLEAN DEFAULT false,
+            captcha TEXT DEFAULT 'false',
             role TEXT
         );
     `)
