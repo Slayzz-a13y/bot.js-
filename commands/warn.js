@@ -53,6 +53,6 @@ module.exports = {
             console.log("Impossible d'envoyer un message à cet utilisateur.")
         }
 
-        await interaction.reply(`✅ ${user.tag} a été warn pour : ${reason}`)
+        await interaction.reply(`${user.tag} a été warn pour : ${reason}`)
     }
 }

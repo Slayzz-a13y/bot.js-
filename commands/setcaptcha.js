@@ -36,7 +36,6 @@ module.exports = {
             channel = interaction.guild.channels.cache.get(channel.id)
             if(!channel) return interaction.reply("Canal invalide !")
 
-            // ✅ INSERT si n'existe pas, UPDATE sinon
             await bot.db.query(
                 `INSERT INTO guilds (id, captcha) VALUES ($1, $2) 
                  ON CONFLICT (id) DO UPDATE SET captcha = $2`,

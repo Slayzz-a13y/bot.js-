@@ -14,6 +14,11 @@ module.exports = {
             let channel = member.guild.channels.cache.get(req[0].captcha)
             if(!channel) return console.log('[CAPTCHA] Canal introuvable:', req[0].captcha)
 
+            let unverifiedRole = member.guild.roles.cache.find(r => r.name === "Non-vérifié")
+            if(unverifiedRole) {
+                await member.roles.add(unverifiedRole)
+            }
+
             console.log('[CAPTCHA] Création permissions...')
             await channel.permissionOverwrites.create(member, {
                 SendMessages: true,
@@ -21,7 +26,7 @@ module.exports = {
                 ReadMessageHistory: true
             })
 
-            let captcha = await bot.function.generateCaptcha() // ✅ generateCaptcha pas createCaptcha
+            let captcha = await bot.function.generateCaptcha()
 
             let msg = await channel.send({
                 content: `${member} vous avez 2 minutes pour résoudre le captcha ! Si vous ne le réussissez pas dans ce délai, vous serez expulsé.`,
@@ -35,7 +40,9 @@ module.exports = {
                 if(response.content === captcha.text) {
                     await msg.delete()
                     await response.delete()
-                    await member.roles.add(req[0].role)
+            
+                    if(unverifiedRole) await member.roles.remove(unverifiedRole)
+                    if(req[0].role) await member.roles.add(req[0].role)
                     try { await member.send("Vous avez réussi le captcha, vous avez maintenant accès au serveur !") } catch (err) {}
                     await channel.permissionOverwrites.delete(member)
 
