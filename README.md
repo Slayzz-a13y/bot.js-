@@ -1,3 +1,3 @@
 # bot.js-
 
-bot en .js style administrateur 
+bot en java script
